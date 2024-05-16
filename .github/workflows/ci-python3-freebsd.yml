@@ -9,29 +9,32 @@ on:
     branches: [ python3 ]
   pull_request:
     branches: [ python3 ]
+  workflow_dispatch:
+  schedule:
+    - cron: '37 15 * * 5'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   test:
     # The type of runner that the job will run on
-    runs-on: macos-12
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        freebsd-release: [ '12.3', '13.1' ]
+        freebsd-release: [ '13.2', '13.3', '14.0' ]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Test in FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.0
+      uses: vmactions/freebsd-vm@v1
       with:
         release: ${{ matrix.freebsd-release }}
         usesh: true
-        prepare: pkg install -y python3 py39-pip coreutils cksfv git-tiny
+        prepare: pkg install -y python3 py39-pip coreutils cksfv git-tiny rust
         run: |
           set -ex
 
@@ -49,7 +52,8 @@ jobs:
           ln -s /usr/local/bin/gsha384sum /usr/local/bin/sha384sum
           ln -s /usr/local/bin/gsha512sum /usr/local/bin/sha512sum
 
-          pw useradd runner -u 501 -g staff -d /Users/runner
+          pw groupadd docker -g 127
+          pw useradd runner -u 1001 -g docker
 
           # Install test dependencies
           pip install pyroma

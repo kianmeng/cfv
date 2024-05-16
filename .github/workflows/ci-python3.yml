@@ -9,6 +9,9 @@ on:
     branches: [ python3 ]
   pull_request:
     branches: [ python3 ]
+  workflow_dispatch:
+  schedule:
+    - cron: '37 15 * * 5'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -19,24 +22,30 @@ jobs:
 
     strategy:
       matrix:
-        os: [ ubuntu-22.04, ubuntu-20.04, ubuntu-18.04 ]
-        python-version: [ '3.5', '3.6', '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04 ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11' ]
         # Exclude unsupported OS/Python version combinations
         exclude:
           - os: ubuntu-22.04
-            python-version: '3.5'
-          - os: ubuntu-22.04
             python-version: '3.6'
+          - os: ubuntu-24.04
+            python-version: '3.6'
+          - os: ubuntu-24.04
+            python-version: '3.7'
+          - os: ubuntu-24.04
+            python-version: '3.8'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+          check-latest: true
 
       - name: Install test dependencies
         run: |
@@ -67,7 +76,7 @@ jobs:
           test/test.py -e --exit-early
 
       - name: Check package quality
-        continue-on-error: ${{ contains(fromJson('["3.5", "3.6"]'), matrix.python-version) }}
+        continue-on-error: ${{ contains(fromJson('["3.6"]'), matrix.python-version) }}
         run: pyroma -n 9 .
 
       - name: Check the completeness of MANIFEST.in
