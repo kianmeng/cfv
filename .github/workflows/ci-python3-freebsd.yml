@@ -52,7 +52,8 @@ jobs:
           ln -s /usr/local/bin/gsha384sum /usr/local/bin/sha384sum
           ln -s /usr/local/bin/gsha512sum /usr/local/bin/sha512sum
 
-          pw useradd runner -u 501 -g staff -d /Users/runner
+          pw groupadd docker -g 127
+          pw useradd runner -u 1001 -g docker
 
           # Install test dependencies
           pip install pyroma
