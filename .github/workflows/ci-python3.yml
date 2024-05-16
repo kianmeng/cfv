@@ -9,6 +9,9 @@ on:
     branches: [ python3 ]
   pull_request:
     branches: [ python3 ]
+  workflow_dispatch:
+  schedule:
+    - cron: '37 15 * * 5'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
