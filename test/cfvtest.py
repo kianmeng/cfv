@@ -23,8 +23,8 @@ from builtins import map
 from builtins import object
 
 import fnmatch
-import imp
 import importlib
+import importlib.util
 import os
 import shlex
 import sys
@@ -201,8 +201,14 @@ def setcfv(fn=None, internal=None):
     cfv_compiled = compile(_cfv_code, cfvfn, 'exec')
 
     with open(cfvfn, 'rt') as f:
+        # For spec_from_file_location to accept a file without the .py suffix ("cfv")
+        importlib.machinery.SOURCE_SUFFIXES.append('')
+        spec = importlib.util.spec_from_file_location('cfvwrapper', cfvfn)
+        module = importlib.util.module_from_spec(spec)
         # This is so that the sys.path modification of the wrapper (if it has one) will be executed..
-        imp.load_source('cfvwrapper', cfvfn, f)
+        spec.loader.exec_module(module)
+        # Restore SOURCE_SUFFIXES to its default value
+        importlib.machinery.SOURCE_SUFFIXES.pop()
 
     get_version_flags()
 
