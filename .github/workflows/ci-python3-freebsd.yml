@@ -64,13 +64,13 @@ jobs:
           pip list
 
           # Check syntax by compiling code
-          python -m compileall -f .
+          python -W error -bb -m compileall -f .
 
           # Run unit tests
-          su runner -c 'python -bb test/test.py --unit --exit-early'
+          su runner -c 'python -W error -bb test/test.py --unit --exit-early'
 
           # Run integration tests (internal)
-          su runner -c 'ulimit -n; ulimit -n 4096; python -bb test/test.py -i --exit-early'
+          su runner -c 'ulimit -n; ulimit -n 4096; python -W error -bb test/test.py -i --exit-early'
 
           # Run integration tests (external process)
           su runner -c 'ulimit -n; ulimit -n 4096; test/test.py -e --exit-early'

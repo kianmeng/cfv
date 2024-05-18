@@ -58,16 +58,16 @@ jobs:
           pip list
 
       - name: Check syntax by compiling code
-        run: python -m compileall -f .
+        run: python -W error -bb -m compileall -f .
 
       - name: Run unit tests
-        run: python -bb test/test.py --unit --exit-early
+        run: python -W error -bb test/test.py --unit --exit-early
 
       - name: Run integration tests (internal)
         run: |
           ulimit -n
           ulimit -n 4096
-          python -bb test/test.py -i --exit-early
+          python -W error -bb test/test.py -i --exit-early
 
       - name: Run integration tests (external process)
         run: |
