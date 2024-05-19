@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI python3 dependencies
+name: CI python3 Dependencies
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '37 15 * * 5'
+
+permissions:
+  issues: write
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -38,11 +41,11 @@ jobs:
 
             // Check if Github issue already exists
             const issueTitle = 'Add support for Python ' + latestPythonMinorVersion
-            const issues = await github.paginate(github.rest.issues.listForRepo({
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-            }))
+            })
             const existingIssue = issues.find(issue => issue.title === issueTitle)
             if (existingIssue) {
               console.log('Issue already exists')
