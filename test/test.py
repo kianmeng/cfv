@@ -1890,3 +1890,4 @@ try:
     sys.exit(failed)
 finally:
     shutil.rmtree(tmpdatapath)
+    logfile.close()
