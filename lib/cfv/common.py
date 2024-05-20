@@ -1531,8 +1531,8 @@ def getimagedimensions(filename):
         return '0', '0'
     try:
         from PIL import Image
-        im1 = Image.open(filename)
-        return list(map(str, im1.size))
+        with Image.open(filename) as im1:
+            return list(map(str, im1.size))
     except (ImportError, IOError):
         return '0', '0'
 
