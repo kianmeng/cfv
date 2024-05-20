@@ -29,6 +29,7 @@ from builtins import str
 __version__ = '3.0.1.dev0'
 __homepage__ = 'https://github.com/cfv-project/cfv'
 
+import contextlib
 import copy
 import errno
 import getopt
@@ -466,8 +467,6 @@ class ChksumType(object):
             cache.set_verified(filename)
         try:
             cf_stats = stats.make_sub_stats()
-            if not file:
-                file = fileutil.open_read(filename, config)
             self.do_test_chksumfile(file)
             cf_stats.sub_stats_end(stats)
             view.ev_test_cf_done(filename, cf_stats)
@@ -1532,8 +1531,8 @@ def getimagedimensions(filename):
         return '0', '0'
     try:
         from PIL import Image
-        im1 = Image.open(filename)
-        return list(map(str, im1.size))
+        with Image.open(filename) as im1:
+            return list(map(str, im1.size))
     except (ImportError, IOError):
         return '0', '0'
 
@@ -1694,26 +1693,33 @@ def visit_dir(name, st=None, noisy=1):
 
 
 def test(filename, typename, restrict_typename='auto'):
-    if typename != 'auto':
-        cf = cftypes.get_handler(typename)()
-        cf.test_chksumfile(None, filename)
-        return
+    class UnexpectedHandlerException(Exception):
+        pass
 
-    try:
-        file = fileutil.open_read(filename, config)
+    def get_cf_handler(file, typename, restrict_typename):
+        if typename != 'auto':
+            return cftypes.get_handler(typename)()
         cftype = cftypes.auto_chksumfile_match(file)
         if restrict_typename != 'auto' and cftypes.get_handler(restrict_typename) != cftype:
-            return
+            raise UnexpectedHandlerException()
         if cftype:
-            cf = cftype()
+            return cftype()
+
+    try:
+        with contextlib.closing(fileutil.open_read(filename, config)) as file:
+            cf = get_cf_handler(file, typename, restrict_typename)
+            if not cf:
+                view.ev_test_cf_unrecognized(filename, file._decode_errs)
+                stats.cferror += 1
+                return
+
             cf.test_chksumfile(file, filename)
-            return
+    except UnexpectedHandlerException:
+        return
     except EnvironmentError as a:
         stats.cferror += 1
         view.ev_cf_enverror(filename, a)
         return -1
-    view.ev_test_cf_unrecognized(filename, file._decode_errs)
-    stats.cferror += 1
 
 
 def make(cftype, ifilename, testfiles):

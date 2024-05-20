@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04 ]
-        python-version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11', '3.12', '3.13' ]
         # Exclude unsupported OS/Python version combinations
         exclude:
           - os: ubuntu-22.04
@@ -58,16 +58,16 @@ jobs:
           pip list
 
       - name: Check syntax by compiling code
-        run: python -m compileall -f .
+        run: python -W error -bb -m compileall -f .
 
       - name: Run unit tests
-        run: python -bb test/test.py --unit --exit-early
+        run: python -W error -bb test/test.py --unit --exit-early
 
       - name: Run integration tests (internal)
         run: |
           ulimit -n
           ulimit -n 4096
-          python -bb test/test.py -i --exit-early
+          python -W error -bb test/test.py -i --exit-early
 
       - name: Run integration tests (external process)
         run: |

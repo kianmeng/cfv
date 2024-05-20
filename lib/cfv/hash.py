@@ -45,27 +45,31 @@ def _getfilechecksum(filename, hasher, callback):
             if callback:
                 callback(s)
 
-    if f == sys.stdin.buffer or _nommap or callback:
-        return finish(hasher(), 0)
-    else:
-        s = os.path.getsize(filename)
-        try:
-            if s > _MAX_MMAP:
-                # Work around python 2.[56] problem with md5 of large mmap objects
-                raise OverflowError
-            m = hasher(dommap(f.fileno(), s))
-        except OverflowError:
-            # mmap size is limited by C's int type, which even on 64 bit
-            # arches is often 32 bits, so we can't use sys.maxint
-            # either.  If we get the error, just assume 32 bits.
-            mmapsize = min(s, _FALLBACK_MMAP)
-            m = hasher(dommap(f.fileno(), mmapsize))
-            f.seek(mmapsize)
-            # unfortunatly, python's mmap module doesn't support the
-            # offset parameter, so we just have to do the rest of the
-            # file the old fashioned way.
-            return finish(m, mmapsize)
-        return m.digest(), s
+    try:
+        if f == sys.stdin.buffer or _nommap or callback:
+            return finish(hasher(), 0)
+        else:
+            s = os.path.getsize(filename)
+            try:
+                if s > _MAX_MMAP:
+                    # Work around python 2.[56] problem with md5 of large mmap objects
+                    raise OverflowError
+                m = hasher(dommap(f.fileno(), s))
+            except OverflowError:
+                # mmap size is limited by C's int type, which even on 64 bit
+                # arches is often 32 bits, so we can't use sys.maxint
+                # either.  If we get the error, just assume 32 bits.
+                mmapsize = min(s, _FALLBACK_MMAP)
+                m = hasher(dommap(f.fileno(), mmapsize))
+                f.seek(mmapsize)
+                # unfortunatly, python's mmap module doesn't support the
+                # offset parameter, so we just have to do the rest of the
+                # file the old fashioned way.
+                return finish(m, mmapsize)
+            return m.digest(), s
+    finally:
+        if filename != '':
+            f.close()
 
 
 def getfilechecksumgeneric(algo):

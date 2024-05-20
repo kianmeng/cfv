@@ -104,6 +104,7 @@ class PeekFile(object):
         self.readline = self._readline
         self.read = fileobj.read
         self.seek = fileobj.seek
+        self.close = fileobj.close
 
     def seek(self, *args):
         self._done_peeking(raw=1)
@@ -116,6 +117,9 @@ class PeekFile(object):
     def read(self, *args):
         self._done_peeking(raw=1)
         return self.read(*args)
+
+    def close(self):
+        self.fileobj.close()
 
 
 def PeekFileNonseekable(fileobj, filename, encoding):

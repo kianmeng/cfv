@@ -242,7 +242,7 @@ def all_unittests_suite():
     assert modules_to_test
     alltests = unittest.TestSuite()
     for module in map(my_import, modules_to_test):
-        alltests.addTest(unittest.findTestCases(module))
+        alltests.addTest(unittest.defaultTestLoader.loadTestsFromModule(module))
 
     import cfv.common
     libdir = os.path.split(cfv.common.__file__)[0]
