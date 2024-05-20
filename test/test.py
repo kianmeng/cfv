@@ -1354,7 +1354,7 @@ def test_encoding2():
                         raw_fnok += 1
                         flag_ok_raw = True
                 try:
-                    open(os.path.join(d, fn), 'rb')
+                    open(os.path.join(d, fn), 'rb').close()
                 except (EnvironmentError, UnicodeError):
                     files_fnerrs += 1
                 else:
@@ -1394,14 +1394,13 @@ def test_encoding2():
 def largefile2GB_test():
     # hope you have sparse file support ;)
     fn = os.path.join('bigfile2', 'bigfile')
-    f = open(fn, 'wb')
     try:
-        f.write(b'hi')
-        f.seek(2 ** 30)
-        f.write(b'foo')
-        f.seek(2 ** 31)
-        f.write(b'bar')
-        f.close()
+        with open(fn, 'wb') as f:
+            f.write(b'hi')
+            f.seek(2 ** 30)
+            f.write(b'foo')
+            f.seek(2 ** 31)
+            f.write(b'bar')
         test_generic(cfvcmd + ' -v -T -p %s' % 'bigfile2', rcurry(cfv_all_test, ok=6))
     finally:
         os.unlink(fn)
@@ -1410,16 +1409,15 @@ def largefile2GB_test():
 def largefile4GB_test():
     # hope you have sparse file support ;)
     fn = os.path.join('bigfile', 'bigfile')
-    f = open(fn, 'wb')
     try:
-        f.write(b'hi')
-        f.seek(2 ** 30)
-        f.write(b'foo')
-        f.seek(2 ** 31)
-        f.write(b'bar')
-        f.seek(2 ** 32)
-        f.write(b'baz')
-        f.close()
+        with open(fn, 'wb') as f:
+            f.write(b'hi')
+            f.seek(2 ** 30)
+            f.write(b'foo')
+            f.seek(2 ** 31)
+            f.write(b'bar')
+            f.seek(2 ** 32)
+            f.write(b'baz')
         test_generic(cfvcmd + ' -v -T -p %s' % 'bigfile', rcurry(cfv_all_test, ok=10))
     finally:
         os.unlink(fn)
@@ -1766,7 +1764,7 @@ def all_tests():
         else:
             if t == 'par':
                 try:
-                    open('data1'.encode('utf-16le').decode('utf-16be'), 'rb')
+                    open('data1'.encode('utf-16le').decode('utf-16be'), 'rb').close()
                 except UnicodeError:
                     nf = 0
                     err = 4
@@ -1778,7 +1776,7 @@ def all_tests():
                 test_generic(cfvcmd + ' --encoding=cp500 -i -T -f test.' + t, rcurry(cfv_all_test, cferror=4))
             else:
                 try:
-                    open(b'data1'.decode('cp500'), 'rb')
+                    open(b'data1'.decode('cp500'), 'rb').close()
                 except UnicodeError:
                     nf = 0
                     err = 4
