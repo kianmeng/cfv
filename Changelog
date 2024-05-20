@@ -2,6 +2,8 @@
 	* WARNING: This is a development snapshot, not a stable release.
 	* Drop support for Python 3.5.
 	* Python 3.6 is now the minimum supported version.
+	* Add support for Python 3.12 (Thanks to Louis Sautier).
+	* Add support for Python 3.13.
 	* Correctly close files in various situations.
 
 2022-10-30 - v3.0.0:
