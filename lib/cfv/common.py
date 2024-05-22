@@ -880,7 +880,10 @@ class PAR(ChksumType, MD5_MixIn):
             control_md5 = hash.md5()
             control_md5.update(d[0x20:])
             stats.bytesread += len(d)
-        if version not in (0x00000900, 0x00010000):  # ver 0.9 and 1.0 are the same, as far as we care.  Future versions (if any) may very likely have incompatible changes, so don't accept them either.
+
+        # ver 0.9 and 1.0 are the same, as far as we care.
+        # Future versions (if any) may very likely have incompatible changes, so don't accept them either.
+        if version not in (0x00000900, 0x00010000):
             raise EnvironmentError(errno.EINVAL, "can't handle PAR version %s" % ver2str(version))
 
         view.ev_test_cf_begin('par v%s' % ver2str(version), file.name, 'created by %s v%s' % (prog2str(client >> 24), ver2str(client & 0xFFFFFF)))
